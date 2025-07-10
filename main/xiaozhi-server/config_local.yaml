@@ -1,0 +1,268 @@
+# Self-Hosted Local Model Configuration
+# This config focuses on local/open source models for cost-free operation
+# Run ./model_download.sh first to download required models
+
+# Basic server configuration (unchanged)
+server:
+  ip: 0.0.0.0
+  port: 8000
+  http_port: 8003
+  websocket: ws://localhost:8000/xiaozhi/v1/
+  vision_explain: http://localhost:8003/mcp/vision/explain
+  timezone_offset: +8
+  auth:
+    enabled: false
+
+log:
+  log_level: INFO
+  log_dir: tmp
+  log_file: "server.log"
+  data_dir: data
+
+delete_audio: true
+close_connection_no_voice_time: 120
+tts_timeout: 10
+enable_wakeup_words_response_cache: true
+enable_greeting: true
+enable_stop_tts_notify: false
+
+exit_commands:
+  - "exit"
+  - "close"
+  - "quit"
+  - "goodbye"
+
+xiaozhi:
+  type: hello
+  version: 1
+  transport: websocket
+  audio_params:
+    format: opus
+    sample_rate: 16000
+    channels: 1
+    frame_duration: 60
+
+# Test scenarios for local models
+module_test:
+  test_sentences:
+    - "Hello, please introduce yourself and your capabilities"
+    - "What's the weather like today in New York?"
+    - "Please explain quantum computing principles in 100 words"
+    - "How do I control smart home devices?"
+    - "What are the benefits of renewable energy?"
+    - "Help me with some IoT automation tasks"
+    - "Tell me about the latest technology trends"
+
+wakeup_words:
+  - "Hey Xiaozhi"
+  - "Hello assistant"
+  - "Xiaozhi"
+  - "Hi there"
+
+# Local model selection for testing
+selected_module:
+  VAD: SileroVAD          # Local VAD model
+  ASR: FunASR             # Local ASR model  
+  LLM: Qwen25_4B          # Start with 4B model for testing
+  VLLM: OllamaVLLM        # Local vision model
+  TTS: EdgeTTS            # Local TTS
+  Memory: nomem           # No memory for testing
+  Intent: function_call   # Function calling for IoT
+
+# Intent recognition with function calling
+Intent:
+  function_call:
+    type: function_call
+    functions:
+      - get_weather
+      - get_news_from_newsnow
+      - play_music
+
+Memory:
+  nomem:
+    type: nomem
+
+# Local ASR configuration
+ASR:
+  FunASR:
+    type: fun_local
+    model_dir: models/SenseVoiceSmall
+    output_dir: tmp/
+
+# Local LLM configurations - All Ollama-based
+LLM:
+  # Ultra-lightweight models (0.6B-1.7B) - For ultra-fast responses
+  Qwen25_06B:
+    type: ollama
+    model_name: qwen2.5:0.6b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 400
+    
+  Qwen25_1_7B:
+    type: ollama
+    model_name: qwen2.5:1.7b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 500
+
+  # Small models (1B-4B) - Balanced performance
+  Llama32_1B:
+    type: ollama
+    model_name: llama3.2:1b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 500
+    
+  Gemma3_1B:
+    type: ollama
+    model_name: gemma3:1b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 500
+    
+  Qwen25_4B:
+    type: ollama
+    model_name: qwen2.5:4b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 600
+    
+  Llama32_3B:
+    type: ollama
+    model_name: llama3.2:3b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 600
+    
+  Gemma3_4B:
+    type: ollama
+    model_name: gemma3:4b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 600
+
+  # Medium models (8B-14B) - High quality responses
+  Qwen25_8B:
+    type: ollama
+    model_name: qwen2.5:8b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 800
+    
+  Qwen25_14B:
+    type: ollama
+    model_name: qwen2.5:14b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 800
+    
+  GLM4_9B:
+    type: ollama
+    model_name: glm4:9b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 800
+
+  # Specialty models (11B-12B) - Multimodal capabilities
+  Llama32_11B:
+    type: ollama
+    model_name: llama3.2:11b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 800
+    
+  Gemma3_12B:
+    type: ollama
+    model_name: gemma3:12b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 800
+
+  # Large models (20B+) - Optional, for later testing
+  Qwen25_32B:
+    type: ollama
+    model_name: qwen2.5:32b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 1000
+    
+  Gemma3_27B:
+    type: ollama
+    model_name: gemma3:27b
+    base_url: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 1000
+
+# Vision Language Models
+VLLM:
+  OllamaVLLM:
+    type: ollama
+    model_name: llama3.2:11b  # Multimodal model
+    base_url: http://localhost:11434
+
+# Local TTS configuration
+TTS:
+  EdgeTTS:
+    type: edge
+    voice: en-US-AriaNeural  # Clear English voice for testing
+    rate: "+0%"
+    pitch: "+0Hz"
+  
+  # Optional: Alternative TTS voices for comparison
+  EdgeTTS_Male:
+    type: edge
+    voice: en-US-GuyNeural
+    rate: "+0%"
+    pitch: "+0Hz"
+    
+  EdgeTTS_Fast:
+    type: edge
+    voice: en-US-AriaNeural
+    rate: "+20%"  # Faster for low-latency testing
+    pitch: "+0Hz"
+
+# Character model for ESP32 IoT assistant
+prompt: |
+  You are Xiaozhi, an efficient AI assistant optimized for ESP32 IoT devices and smart home control.
+  
+  [Core Function]
+  - Provide concise, actionable responses for voice interaction
+  - Execute IoT device commands efficiently
+  - Support function calling for weather, news, music, and device control
+  
+  [Response Guidelines]
+  - Keep responses under 50 words for voice output
+  - Be direct and practical
+  - Confirm actions clearly ("Turning on living room light")
+  - Ask for clarification if needed
+  
+  [Capabilities]
+  - Weather information and forecasts
+  - Smart home device control
+  - Music playback management
+  - News and information retrieval
+  - Basic calculations and conversions
+  
+  Respond efficiently for real-time IoT interactions.
+
+end_prompt:
+  enable: true
+  prompt: |
+    Thanks for using Xiaozhi! Have a great day!
+
+# Plugin configurations (minimal for testing)
+plugins:
+  get_weather: 
+    api_host: "mj7p3y7naa.re.qweatherapi.com"
+    api_key: "a861d0d5e7bf4ee1a83d9a9e4f96d4da"
+    default_location: "New York"
+  
+  get_news_from_newsnow:
+    url: "https://newsnow.busiyi.world/api/s?id="
+    news_sources: "Reuters;BBC;CNN"
+    
+  play_music:
+    music_dir: "./music"
+    music_ext: [".mp3", ".wav"]
+    refresh_time: 300
